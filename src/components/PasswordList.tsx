@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Search, Eye, EyeOff, Copy, Trash2, ExternalLink, Shield, Calendar, X } from 'lucide-react';
+import { Search, Eye, EyeOff, Copy, Trash2, ExternalLink, Shield, Calendar, X, Edit } from 'lucide-react';
 import { supabase, SharedPassword } from '../lib/supabase';
 import { decrypt } from '../lib/encryption';
 import { useAuth } from '../contexts/AuthContext';
+import { PasswordForm } from './PasswordForm';
 
 export function PasswordList({ refresh }: { refresh: number }) {
   const { profile, user } = useAuth();
@@ -10,6 +11,7 @@ export function PasswordList({ refresh }: { refresh: number }) {
   const [filteredPasswords, setFilteredPasswords] = useState<SharedPassword[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPassword, setSelectedPassword] = useState<SharedPassword | null>(null);
+  const [editingPassword, setEditingPassword] = useState<SharedPassword | null>(null);
   const [revealedFields, setRevealedFields] = useState<{ [key: string]: boolean }>({});
   const [decryptedValues, setDecryptedValues] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(true);
@@ -374,17 +376,40 @@ export function PasswordList({ refresh }: { refresh: number }) {
               </div>
 
               {(profile?.is_admin || selectedPassword.created_by === profile?.id) && (
-                <button
-                  onClick={() => deletePassword(selectedPassword.id)}
-                  className="w-full bg-red-900/30 hover:bg-red-900/50 border border-red-700 text-red-400 font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-                >
-                  <Trash2 className="w-5 h-5" />
-                  Delete Password
-                </button>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => {
+                      setEditingPassword(selectedPassword);
+                      setSelectedPassword(null);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 border border-blue-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Edit className="w-5 h-5" />
+                    Edit Password
+                  </button>
+                  <button
+                    onClick={() => deletePassword(selectedPassword.id)}
+                    className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 text-red-400 font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    Delete Password
+                  </button>
+                </div>
               )}
             </div>
           </div>
         </div>
+      )}
+
+      {editingPassword && (
+        <PasswordForm
+          editPassword={editingPassword}
+          onSuccess={() => {
+            setEditingPassword(null);
+            loadPasswords();
+          }}
+          onClose={() => setEditingPassword(null)}
+        />
       )}
     </div>
   );

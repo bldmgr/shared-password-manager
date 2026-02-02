@@ -104,16 +104,19 @@ export function AuditLogs() {
     }
   };
 
-  const getActionLabel = (actionType: string) => {
-    switch (actionType) {
+  const getActionLabel = (log: AuditLogWithUser) => {
+    switch (log.action_type) {
       case 'login':
         return 'Login';
       case 'password_access':
+        if (log.metadata?.action === 'update') {
+          return 'Updated Password';
+        }
         return 'Accessed Password';
       case 'password_reveal':
         return 'Revealed Password';
       default:
-        return actionType;
+        return log.action_type;
     }
   };
 
@@ -232,7 +235,7 @@ export function AuditLogs() {
                         )}`}
                       >
                         {getActionIcon(log.action_type)}
-                        {getActionLabel(log.action_type)}
+                        {getActionLabel(log)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -246,6 +249,11 @@ export function AuditLogs() {
                       )}
                     </td>
                     <td className="px-6 py-4">
+                      {log.metadata?.action === 'update' && (
+                        <div className="text-xs text-blue-400 mb-1">
+                          Password Updated
+                        </div>
+                      )}
                       {log.metadata?.field && (
                         <div className="text-xs text-slate-400">
                           Field: {log.metadata.field}
