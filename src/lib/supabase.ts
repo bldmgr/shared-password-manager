@@ -27,6 +27,7 @@ export interface SharedPassword {
   description?: string;
   expiration_date?: string;
   two_factor_enabled: boolean;
+  environment: 'dev' | 'qa' | 'prod';
   created_by?: string;
   created_at: string;
   updated_at: string;

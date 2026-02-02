@@ -23,6 +23,7 @@ export function PasswordForm({ onSuccess }: PasswordFormProps) {
     description: '',
     expiration_date: '',
     two_factor_enabled: false,
+    environment: 'dev' as 'dev' | 'qa' | 'prod',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,6 +44,7 @@ export function PasswordForm({ onSuccess }: PasswordFormProps) {
         description: formData.description || null,
         expiration_date: formData.expiration_date || null,
         two_factor_enabled: formData.two_factor_enabled,
+        environment: formData.environment,
         created_by: user?.id,
       });
 
@@ -57,6 +59,7 @@ export function PasswordForm({ onSuccess }: PasswordFormProps) {
         description: '',
         expiration_date: '',
         two_factor_enabled: false,
+        environment: 'dev',
       });
       setIsOpen(false);
       onSuccess();
@@ -180,16 +183,34 @@ export function PasswordForm({ onSuccess }: PasswordFormProps) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Expiration Date
-            </label>
-            <input
-              type="date"
-              value={formData.expiration_date}
-              onChange={(e) => setFormData({ ...formData, expiration_date: e.target.value })}
-              className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Expiration Date
+              </label>
+              <input
+                type="date"
+                value={formData.expiration_date}
+                onChange={(e) => setFormData({ ...formData, expiration_date: e.target.value })}
+                className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Environment *
+              </label>
+              <select
+                value={formData.environment}
+                onChange={(e) => setFormData({ ...formData, environment: e.target.value as 'dev' | 'qa' | 'prod' })}
+                required
+                className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="dev">Development</option>
+                <option value="qa">QA</option>
+                <option value="prod">Production</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

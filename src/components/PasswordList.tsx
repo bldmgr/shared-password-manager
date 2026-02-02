@@ -95,6 +95,15 @@ export function PasswordList({ refresh }: { refresh: number }) {
     return new Date(date) < new Date();
   };
 
+  const getEnvironmentBadge = (env: 'dev' | 'qa' | 'prod') => {
+    const badges = {
+      dev: { label: 'DEV', color: 'bg-blue-500/20 text-blue-400 border-blue-500' },
+      qa: { label: 'QA', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500' },
+      prod: { label: 'PROD', color: 'bg-red-500/20 text-red-400 border-red-500' },
+    };
+    return badges[env];
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12">
@@ -142,12 +151,18 @@ export function PasswordList({ refresh }: { refresh: number }) {
               <p className="text-sm text-slate-400 mb-2">{password.username}</p>
             )}
 
-            {password.expiration_date && (
-              <div className={`flex items-center gap-1 text-xs ${isExpired(password.expiration_date) ? 'text-red-400' : 'text-slate-500'}`}>
-                <Calendar className="w-3 h-3" />
-                <span>Expires: {new Date(password.expiration_date).toLocaleDateString()}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`text-xs px-2 py-0.5 rounded border ${getEnvironmentBadge(password.environment).color} font-semibold`}>
+                {getEnvironmentBadge(password.environment).label}
+              </span>
+
+              {password.expiration_date && (
+                <div className={`flex items-center gap-1 text-xs ${isExpired(password.expiration_date) ? 'text-red-400' : 'text-slate-500'}`}>
+                  <Calendar className="w-3 h-3" />
+                  <span>Expires: {new Date(password.expiration_date).toLocaleDateString()}</span>
+                </div>
+              )}
+            </div>
           </button>
         ))}
       </div>
@@ -299,6 +314,13 @@ export function PasswordList({ refresh }: { refresh: number }) {
               )}
 
               <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-900 border border-slate-700 rounded-lg p-4">
+                  <p className="text-sm text-slate-400 mb-1">Environment</p>
+                  <span className={`inline-block text-sm px-3 py-1 rounded border ${getEnvironmentBadge(selectedPassword.environment).color} font-semibold`}>
+                    {getEnvironmentBadge(selectedPassword.environment).label}
+                  </span>
+                </div>
+
                 {selectedPassword.expiration_date && (
                   <div className={`border rounded-lg p-4 ${isExpired(selectedPassword.expiration_date) ? 'bg-red-900/20 border-red-700' : 'bg-slate-900 border-slate-700'}`}>
                     <p className="text-sm text-slate-400 mb-1">Expiration Date</p>
