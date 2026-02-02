@@ -32,3 +32,17 @@ export interface SharedPassword {
   created_at: string;
   updated_at: string;
 }
+
+export interface AuditLog {
+  id: string;
+  user_id: string;
+  action_type: 'login' | 'password_access' | 'password_reveal';
+  resource_id?: string;
+  resource_name?: string;
+  metadata: {
+    user_agent?: string;
+    ip_address?: string;
+    [key: string]: any;
+  };
+  created_at: string;
+}

@@ -5,7 +5,7 @@ import { decrypt } from '../lib/encryption';
 import { useAuth } from '../contexts/AuthContext';
 
 export function PasswordList({ refresh }: { refresh: number }) {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [passwords, setPasswords] = useState<SharedPassword[]>([]);
   const [filteredPasswords, setFilteredPasswords] = useState<SharedPassword[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +51,26 @@ export function PasswordList({ refresh }: { refresh: number }) {
     }
   };
 
+  const logAudit = async (
+    actionType: 'password_access' | 'password_reveal',
+    password: SharedPassword,
+    field?: string
+  ) => {
+    if (!user) return;
+
+    await supabase.from('audit_logs').insert({
+      user_id: user.id,
+      action_type: actionType,
+      resource_id: password.id,
+      resource_name: password.service_name,
+      metadata: {
+        user_agent: navigator.userAgent,
+        field: field,
+        environment: password.environment,
+      },
+    });
+  };
+
   const toggleReveal = async (field: string, encryptedValue: string) => {
     const key = `${selectedPassword?.id}-${field}`;
 
@@ -62,6 +82,10 @@ export function PasswordList({ refresh }: { refresh: number }) {
         setDecryptedValues({ ...decryptedValues, [key]: decrypted });
       }
       setRevealedFields({ ...revealedFields, [key]: true });
+
+      if (selectedPassword) {
+        await logAudit('password_reveal', selectedPassword, field);
+      }
     }
   };
 
@@ -132,9 +156,10 @@ export function PasswordList({ refresh }: { refresh: number }) {
         {filteredPasswords.map((password) => (
           <button
             key={password.id}
-            onClick={() => {
+            onClick={async () => {
               setError('');
               setSelectedPassword(password);
+              await logAudit('password_access', password);
             }}
             className="bg-slate-900 border border-slate-700 rounded-lg p-4 hover:border-blue-500 transition-all text-left group"
           >
