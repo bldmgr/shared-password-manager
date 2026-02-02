@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Activity, Eye, LogIn, Shield, Calendar } from 'lucide-react';
+import { Search, Activity, Eye, LogIn, Shield, Calendar, FileText } from 'lucide-react';
 import { supabase, AuditLog } from '../lib/supabase';
 
 interface AuditLogWithUser extends AuditLog {
@@ -86,6 +86,8 @@ export function AuditLogs() {
         return <Eye className="w-4 h-4" />;
       case 'password_reveal':
         return <Shield className="w-4 h-4" />;
+      case 'text_file_access':
+        return <FileText className="w-4 h-4" />;
       default:
         return <Activity className="w-4 h-4" />;
     }
@@ -99,6 +101,8 @@ export function AuditLogs() {
         return 'text-blue-400 bg-blue-500/20 border-blue-500';
       case 'password_reveal':
         return 'text-yellow-400 bg-yellow-500/20 border-yellow-500';
+      case 'text_file_access':
+        return 'text-purple-400 bg-purple-500/20 border-purple-500';
       default:
         return 'text-slate-400 bg-slate-500/20 border-slate-500';
     }
@@ -115,6 +119,11 @@ export function AuditLogs() {
         return 'Accessed Password';
       case 'password_reveal':
         return 'Revealed Password';
+      case 'text_file_access':
+        if (log.metadata?.action === 'update') {
+          return 'Updated Text File';
+        }
+        return 'Accessed Text File';
       default:
         return log.action_type;
     }

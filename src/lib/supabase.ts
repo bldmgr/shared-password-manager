@@ -33,10 +33,23 @@ export interface SharedPassword {
   updated_at: string;
 }
 
+export interface SharedTextFile {
+  id: string;
+  title: string;
+  content: string;
+  description?: string;
+  file_type: string;
+  environment: 'dev' | 'qa' | 'prod';
+  tags?: string[];
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AuditLog {
   id: string;
   user_id: string;
-  action_type: 'login' | 'password_access' | 'password_reveal';
+  action_type: 'login' | 'password_access' | 'password_reveal' | 'text_file_access';
   resource_id?: string;
   resource_name?: string;
   metadata: {
