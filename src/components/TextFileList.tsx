@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Copy, Trash2, X, Edit, Tag, Calendar, FileText } from 'lucide-react';
+import { Search, Copy, Trash2, X, Edit, Tag, Calendar, FileText, Download } from 'lucide-react';
 import { supabase, SharedTextFile } from '../lib/supabase';
 import { decrypt } from '../lib/encryption';
 import { useAuth } from '../contexts/AuthContext';
@@ -89,6 +89,39 @@ export function TextFileList({ refresh }: { refresh: number }) {
     } catch (err) {
       setError('Failed to copy to clipboard');
     }
+  };
+
+  const downloadTextFile = (content: string, title: string, fileType: string) => {
+    try {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      const extension = getFileExtension(fileType);
+      link.download = `${title}${extension}`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError('Failed to download file');
+    }
+  };
+
+  const getFileExtension = (fileType: string) => {
+    const extensions: { [key: string]: string } = {
+      json: '.json',
+      yaml: '.yaml',
+      xml: '.xml',
+      markdown: '.md',
+      code: '.txt',
+      config: '.conf',
+      script: '.sh',
+      plaintext: '.txt',
+    };
+    return extensions[fileType] || '.txt';
   };
 
   const deleteTextFile = async (id: string) => {
@@ -260,13 +293,22 @@ export function TextFileList({ refresh }: { refresh: number }) {
               <div className="bg-slate-900 border border-slate-700 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-slate-400">Content</p>
-                  <button
-                    onClick={() => copyToClipboard(decryptedContent)}
-                    className="p-2 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2 text-sm text-slate-300"
-                  >
-                    <Copy className="w-4 h-4" />
-                    Copy
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => copyToClipboard(decryptedContent)}
+                      className="p-2 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2 text-sm text-slate-300"
+                    >
+                      <Copy className="w-4 h-4" />
+                      Copy
+                    </button>
+                    <button
+                      onClick={() => downloadTextFile(decryptedContent, selectedTextFile.title, selectedTextFile.file_type)}
+                      className="p-2 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2 text-sm text-slate-300"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </button>
+                  </div>
                 </div>
                 <pre className="text-white font-mono text-sm bg-slate-950 p-4 rounded-lg overflow-x-auto whitespace-pre-wrap break-words">
                   {decryptedContent}
